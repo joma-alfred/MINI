@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:8080"
+    depends_on:
+      - web
+      - service
+
+  web:
+    build: ./web
+    expose:
+      - "5000"
+    depends_on:
+      - mysql
+      - service
+    environment:
+      - DATABASE_URL=mysql://root:password@mysql/dbname
+      - SERVICE_URL=http://service:8000
+
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dbname
+    ports:
+      - "6603:6603"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  service:
+    build: ./service
+    expose:
+      - "8000"
+
+volumes:
+  mysql_data:
